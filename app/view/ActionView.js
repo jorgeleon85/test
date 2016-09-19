@@ -1,3 +1,5 @@
+'use strict';
+
 var ActionView = function ( observer ) {
 
     var productName = document.getElementById('productName'),

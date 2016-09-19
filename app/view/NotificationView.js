@@ -1,6 +1,8 @@
-var NotificationView = function ( container, observer ) {
+'use strict';
 
-    var render = function (msg) {
+var NotificationView = function(container, observer) {
+
+    var render = function(msg) {
         var element = document.createElement("div"),
             button = document.createElement('button');
 
@@ -13,10 +15,14 @@ var NotificationView = function ( container, observer ) {
         return element;
     };
 
-    observer.register('/notice', function(msg){
+    observer.register('/notice', function(msg) {
         render(msg);
     });
-    
+
+    return {
+        render: render
+    };
+
 };
 
 module.exports = NotificationView;

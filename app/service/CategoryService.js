@@ -1,3 +1,5 @@
+'use strict';
+
 var JSONService = require('./JSONService'),
 	HttpCache = require('../util/HttpCache');
 

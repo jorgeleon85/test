@@ -1,3 +1,20 @@
 {
-    "extends": "google"
+  "extends": "eslint:recommended",
+  "env": {
+      "browser": true
+  },
+  "globals": {
+    "require": true,
+    "jasmine": true,
+    "module": true,
+    "spyOn": true,
+    "describe": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "it": true,
+    "expect": true
+  },
+  "rules": {
+        "no-control-regex": "off"
+    }
 }

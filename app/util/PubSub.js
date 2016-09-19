@@ -1,40 +1,40 @@
-var PubSub = function PubSub(){
+'use strict';
 
-	var channels = {};
+var PubSub = function PubSub() {
 
-	var register = function(channel, callback){
-		if(!channels[channel]) {
-			channels[channel] = [];
-		}
-		channels[channel].push(callback);
-	}
+    var channels = {};
 
-	var release = function(channel, callback){
-		if(channels[channel]) {
-			channels[channel] = channels[channel].filter(function(element){
-				return element !== callback
-			});
-		}
-	}
+    var register = function(channel, callback) {
+        if (!channels[channel]) {
+            channels[channel] = [];
+        }
+        channels[channel].push(callback);
+    }
 
-	var publish = function(channel, data){
-		if(channels[channel]){
-			var clients = channels[channel];
-			channels[channel].forEach(function(client){
-				client(data);
-			});
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
+    var release = function(channel, callback) {
+        if (channels[channel]) {
+            channels[channel] = channels[channel].filter(function(element) {
+                return element !== callback
+            });
+        }
+    }
 
-	return {
-		publish: publish,
-		register: register,
-		release: release
-	}
+    var publish = function(channel, data) {
+        if (channels[channel]) {
+            channels[channel].forEach(function(client) {
+                client(data);
+            });
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    return {
+        publish: publish,
+        register: register,
+        release: release
+    }
 };
 
 module.exports = PubSub;

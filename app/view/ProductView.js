@@ -1,3 +1,5 @@
+'use strict';
+
 var ProductView = function ( container, observer ) {
 
     var productNodes = {};
@@ -34,8 +36,6 @@ var ProductView = function ( container, observer ) {
 
     var removeHandler = function removeHandler(e){
         if (e.target && e.target.matches("input.deleteBtn")) {
-            //productNodes[e.target.productId].element.remove();
-            //delete productNodes[e.target.productId];
             observer.publish('/delete-product', e.target.productId);
         }
     }

@@ -1,3 +1,5 @@
+'use strict';
+
 var DeferHelper = function DeferHelper(doneData, errorData){
 	var deferObj = {
 		done: function(callback){
