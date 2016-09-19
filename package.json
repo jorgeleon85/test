@@ -1,0 +1,31 @@
+{
+  "name": "gft",
+  "version": "1.0.0",
+  "description": "gft web app",
+  "main": "index.js",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint app",
+    "test": "./node_modules/karma/bin/karma start karma.conf.js",
+    "build": "./node_modules/browserify/bin/cmd.js app/index.js -o dist/app.js"
+  },
+  "keywords": [
+    "gtf",
+    "web",
+    "javascript"
+  ],
+  "author": "jorgeleon85@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "brfs": "^1.4.3",
+    "browserify": "^13.1.0",
+    "eslint": "^3.5.0",
+    "eslint-config-google": "^0.6.0",
+    "jasmine-core": "^2.2.0",
+    "karma": "^0.12.31",
+    "karma-browserify": "^5.1.0",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-jasmine": "^0.3.5",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "watchify": "^3.7.0"
+  }
+}
