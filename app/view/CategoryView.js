@@ -1,19 +1,26 @@
 
-var CategoryView = function ( container ) {
+var CategoryView = function ( container, observer ) {
 
     var element = document.createElement("select"),
+        categoryCollection = null,
         selectedCategory = null,
+        selectedCategoryChanged = function(){},
         options = {};
 
-    var render = function (categoryCollection) {
-        while(container.firstChild){
-            container.firstChild.remove();
+    element.setAttribute('id', 'productCategory')
+
+    var render = function (_categoryCollection) {
+        categoryCollection = _categoryCollection;
+        while(element.firstChild){
+            element.firstChild.remove();
         }
-        categoryCollection.items.forEach(function(item){
+        options = {};
+
+        categoryCollection.items().forEach(function(item){
             var option = document.createElement('option');
             option.innerText = item.name;
             option.setAttribute('value', item.id);
-            if(item.id == selected.id) {
+            if(selectedCategory && item.id == selectedCategory.id) {
                 option.selected = true;
             }
             options[item.id] = option;
@@ -23,14 +30,22 @@ var CategoryView = function ( container ) {
         return element;
     };
 
-    var updateHandler = function updateHandler(){
-        console.log('arguments', arguments);
+    var updateHandler = function updateHandler(e){
+        var id = e.target.value,
+            categoryElement = categoryCollection.find(id);
+        selectedCategoryChanged(categoryElement);
     }
 
     var setSelected = function setSelected(newSelectedCategory){
-        options[selectedCategory.id].selected = false;
+        if(selectedCategory){
+            options[selectedCategory.id].selected = false;
+        }
         selectedCategory = newSelectedCategory;
         options[selectedCategory.id].selected = true;
+    }
+
+    var selectedChanged = function selectedChanged(callback){
+        selectedCategoryChanged = callback;
     }
 
 

@@ -1,4 +1,6 @@
-var ProductView = function ( container ) {
+var ProductView = function ( container, observer ) {
+
+    var productNodes = {};
 
     var render = function (productCollection) {
         // It'd be better to use a templating library for this
@@ -6,58 +8,39 @@ var ProductView = function ( container ) {
         while(container.firstChild){
             container.firstChild.remove();
         }
-        productCollection.forEach(function(product){
-            var element = document.createElement('li'),
-                name = document.createElement('span'),
-                price = document.createElement('span'),
-                action = document.createElement('input');
+        productNodes = {};
+        if(productCollection && productCollection.length > 0) {
+            productCollection.forEach(function(product){
+                var element = document.createElement('li'),
+                    name = document.createElement('span'),
+                    price = document.createElement('span'),
+                    action = document.createElement('input');
 
-            name.innerText = product.name;
-            price.innerText = product.price;
-            action.setAttribute('type', 'button');
-            action.setAttribute('value', 'Delete');
-            action.setAttribute('className', 'deleteBtn');
-            action.productId = product.id;
-            element.appendChild(name);
-            element.appendChild(price);
-            element.appendChild(action);
-            container.appendChild(element);
-        });
+                name.innerText = product.name;
+                price.innerText = product.price;
+                action.setAttribute('type', 'button');
+                action.setAttribute('value', 'Delete');
+                action.setAttribute('class', 'deleteBtn');
+                action.productId = product.id;
+                element.appendChild(name);
+                element.appendChild(price);
+                element.appendChild(action);
+                container.appendChild(element);
+                productNodes[action.productId] = {element: element}
+            });
+        }
         
     };
 
     var removeHandler = function removeHandler(e){
         if (e.target && e.target.matches("input.deleteBtn")) {
-            alert(e.target.productId);
+            //productNodes[e.target.productId].element.remove();
+            //delete productNodes[e.target.productId];
+            observer.publish('/delete-product', e.target.productId);
         }
     }
 
     container.addEventListener("click", removeHandler, false);
-
-
-    var deleteItem = function deleteItem() {
-        if(element.parentElement){
-            text.remove();
-            action.remove();
-            element.remove();
-            text = null;
-            action = null;
-            element = null;
-            action.removeEventListener('click', removeHandler, false);
-        }
-    };
-
-    var updateItem = function updateItem() {
-        if(element.parentElement){
-            text.innerText();
-            action.remove();
-            element.remove();
-            text = null;
-            action = null;
-            element = null;
-            action.removeEventListener('click', removeHandler, false);
-        }
-    };
 
     return {
         render: render

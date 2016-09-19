@@ -1,6 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
-
 var CategoryService = require('./service/CategoryService');
 var ProductService = require('./service/ProductService');
 
@@ -9,76 +7,153 @@ var ProductCollection = require('./model/ProductCollection');
 
 var CategoryView = require('./view/CategoryView');
 var ProductView = require('./view/ProductView');
+var ActionView = require('./view/ActionView');
+var NotificationView = require('./view/NotificationView');
+
+var Observer = require('./util/PubSub');
 
 var Wait = require('./util/Wait');
 
 var Controller = (function() {
 
-	var categoryService = CategoryService(),
+	'use strict';
+
+	var observer = Observer(),
+		categoryService = CategoryService(),
 		productService = ProductService(),
 		categoryCollection = CategoryCollection(),
 		productCollection = ProductCollection(),
-		categoryView,
-		ProductView,
-		currentCategory;
+		categoryView = CategoryView(document.getElementById('categoryContainer'), observer),
+		productView = ProductView(document.getElementById('productContainer'), observer),
+		actionView = ActionView(observer),
+		notificationView = NotificationView(document.getElementById('noticeContainer'), observer),
+		currentCategory = null,
+		loadAndRender;
 
-	Wait([categoryService.get(), productService.get()], function(successData){
-	
-		productCollection.load(successData[1]);
-		categoryCollection.load(successData[0], productCollection);
-
-		productCollection.print();
-		categoryCollection.print();
-
-		categoryView = CategoryView(document.getElementById('categoryContainer'));
-		categoryView.render(categoryCollection);
-
-		currentCategory = categoryCollection.get(0);
-		categoryView.setSelected(currentCategory);
-
-		productView = ProductView(document.getElementById('productContainer'));
-		productView.render(currentCategory.products);
-
-		categoryView.selectedChanged(function(newCurrentCategory){
-			currentCategory = newCurrentCategory;
-			productView.render(currentCategory.products);
-		});
-
+	observer.register('/reset', function(){
+		loadAndRender();
 	});
+	
+	observer.register('/new-product', function(data){
+		currentCategory.add(data.name, data.description, data.price);
+		productView.render(currentCategory.products);
+	});
+
+	observer.register('/delete-product', function(id){
+		currentCategory.remove(id);
+		productView.render(currentCategory.products);
+	});
+
+	categoryView.selectedChanged(function(newCurrentCategory){
+		currentCategory = newCurrentCategory;
+		productView.render(currentCategory.products);
+	});
+
+	var loadAndRender = function loadAndRender(){
+
+		Wait([productService.get(), categoryService.get()], function(successData, errorMsg){
+		
+			if(successData[0]){
+				productCollection.load(successData[0]);
+			} else if(errorMsg[0]) {
+				observer.publish('/notice', errorMsg[0]);
+			}
+
+			if(successData[1]){
+				categoryCollection.load(successData[1], productCollection);
+			} else if(errorMsg[1]) {
+				observer.publish('/notice', errorMsg[1]);
+			}
+
+			categoryView.render(categoryCollection);
+			
+			if(!currentCategory) {
+				currentCategory = categoryCollection.get(0);
+			} else {
+				currentCategory = categoryCollection.find(currentCategory.id);
+			}
+
+			if(currentCategory) {
+				categoryView.setSelected(currentCategory);
+				productView.render(currentCategory.products);
+			}
+			
+		});
+	}
+
+	loadAndRender();
 
 })();
 
-},{"./model/CategoryCollection":2,"./model/ProductCollection":3,"./service/CategoryService":4,"./service/ProductService":6,"./util/Wait":10,"./view/CategoryView":11,"./view/ProductView":12}],2:[function(require,module,exports){
+},{"./model/CategoryCollection":2,"./model/ProductCollection":3,"./service/CategoryService":4,"./service/ProductService":6,"./util/PubSub":9,"./util/Wait":10,"./view/ActionView":11,"./view/CategoryView":12,"./view/NotificationView":13,"./view/ProductView":14}],2:[function(require,module,exports){
 var PubSub = require('../util/PubSub');
 
 function CategoryCollection () {
 
-	var collection = [];
+	var scope = {
+		collection: []
+	}
 
 	var add = function addCategory(id, name, description, products){
-		collection.push({id: id, name: name, description: description, products: products});
+		scope.collection.push({id: id, name: name, description: description, products: products,
+			add: function(name, description, price){
+				var self = this;
+				self.products.push({id: nextId(self.products), name: name, description: description, price: price});
+				self.products = self.products.sort(sort);
+			},
+			remove: function(id){
+				var self = this;
+				self.products = self.products.filter(function(e){ return e.id != id});
+			}
+		});
+	}
+
+	var addProduct = function addProduct(data, category){
+		category.products = category.products.push({id: nextId(category.products), name: data.name, description: data.description, price: data.price});
+		category.products = category.products.sort(sort);
+	}
+
+	var sort = function sort(a, b){
+		return a.price - b.price;
 	}
 
 	var load = function loadCategory(data, products){
-		data.forEach(function(ele){
-			add(ele.id, ele.name, ele.description, products.findAll(ele.products).sort(function(a, b){
-				return a.price - b.price;
-			}));
+		scope.collection = [];
+		if(data && data.length > 0) {
+			data.forEach(function(ele){
+				add(ele.id, ele.name, ele.description, products.findAll(ele.products).sort(sort));
+			});
+		}
+	}
+
+	var find = function find(id) {
+		return scope.collection.find(function(ele){
+			return ele.id.toString() === id.toString();
 		})
 	}
 
 	var get = function getCategory(index){
-		return collection[index];
+		return scope.collection[index];
+	}
+
+	var nextId = function nextId(products){
+		if(products.length === 0){
+			return 1;
+		} else {
+			return Math.max.apply(null, products.map(function(e){return e.id})) + 1;
+		}
 	}
 
 	var print = function print(){
-		console.log(collection);
+		console.log(scope.collection);
 	}
 
 	return {
 		add: add,
 		load: load,
-		items: collection,
+		find: find,
+		items: function(){ return scope.collection },
+		addProduct: addProduct,
 		print: print,
 		get: get
 	};
@@ -91,10 +166,12 @@ var PubSub = require('../util/PubSub');
 
 function ProductCollection () {
 
-	var collection = [];
+	var scope = {
+		collection: []
+	}
 
 	function add(id, name, description, price){
-		collection.push({
+		scope.collection.push({
 			id: id,
 			name: name,
 			description: description,
@@ -103,14 +180,17 @@ function ProductCollection () {
 	}
 
 	var load = function load(data){
-		data.forEach(function(item, index){
-			add(item.id, item.name, item.description, item.price);
-		});
+		scope.collection = [];
+		if(data && data.length > 0) {
+			data.forEach(function(item, index){
+				add(item.id, item.name, item.description, item.price);
+			});
+		}
 	}
 
 	var findAll = function findAll(ids){
 		if(ids) {
-			return collection.filter(function(item){
+			return scope.collection.filter(function(item){
 				return ids.indexOf(item.id) !== -1
 			});
 		} else {
@@ -119,13 +199,21 @@ function ProductCollection () {
 	}
 
 	var sort = function sort(){
-		collection = collection.sort(function(a, b){
+		scope.collection = scope.collection.sort(function(a, b){
 			return a.price - b.price;
 		})
 	}
 
 	var print = function print(){
-		console.log(collection);
+		console.log(scope.collection);
+	}
+
+	var nextId = function nextId(){
+		if(scope.collection.length === 0){
+			return 1;
+		} else {
+			return Math.max.apply(null, scope.collection.map(function(e){return e.id})) + 1;
+		}
 	}
 
 	return {
@@ -133,7 +221,8 @@ function ProductCollection () {
 		load: load,
 		findAll: findAll,
 		print: print,
-		items: collection
+		items: function(){ return scope.collection },
+		nextId: nextId
 	};
 }
 
@@ -397,40 +486,78 @@ var PubSub = function PubSub(){
 
 module.exports = PubSub;
 },{}],10:[function(require,module,exports){
-var Wait = function Wait(services, successCallback, errorCallback){
+var Wait = function Wait(services, callback, errorCallback){
 	
 	var toLoad = services.length,
-		responses = [];
+		responses = [],
+		errors = [];
 
 	services
 		.forEach(function(service, index){
-			service.done(function(data){
-				responses[index] = data;
-				if(--toLoad === 0) {
-					successCallback(responses);
-				}
-			});
+			service
+				.done(function(data){
+					responses[index] = data;
+					if(--toLoad === 0) {
+						callback(responses, errors);
+					}
+				})
+				.error(function(msg){
+					errors[index] = msg;
+					if(--toLoad === 0) {
+						callback(responses, errors);
+					}
+				})
 		});
 }
 
 module.exports = Wait;
 },{}],11:[function(require,module,exports){
+var ActionView = function ( observer ) {
 
-var CategoryView = function ( container ) {
+    var productName = document.getElementById('productName'),
+        productDescription = document.getElementById('productDescription'),
+        productPrice = document.getElementById('productPrice'),
+        addAction = document.getElementById('add'),
+        resetAction = document.getElementById('reset');
+
+    var addHandler = function addHandler(){
+        observer.publish('/new-product', {name: productName.value, description: productDescription.value, price: productPrice.value});
+    }
+
+    var resetHandler = function resetHandler(){
+        observer.publish('/reset');
+    }
+
+    addAction.addEventListener("click", addHandler, false);
+    resetAction.addEventListener("click", resetHandler, false);
+
+};
+
+module.exports = ActionView;
+},{}],12:[function(require,module,exports){
+
+var CategoryView = function ( container, observer ) {
 
     var element = document.createElement("select"),
+        categoryCollection = null,
         selectedCategory = null,
+        selectedCategoryChanged = function(){},
         options = {};
 
-    var render = function (categoryCollection) {
-        while(container.firstChild){
-            container.firstChild.remove();
+    element.setAttribute('id', 'productCategory')
+
+    var render = function (_categoryCollection) {
+        categoryCollection = _categoryCollection;
+        while(element.firstChild){
+            element.firstChild.remove();
         }
-        categoryCollection.items.forEach(function(item){
+        options = {};
+
+        categoryCollection.items().forEach(function(item){
             var option = document.createElement('option');
             option.innerText = item.name;
             option.setAttribute('value', item.id);
-            if(item.id == selected.id) {
+            if(selectedCategory && item.id == selectedCategory.id) {
                 option.selected = true;
             }
             options[item.id] = option;
@@ -440,14 +567,22 @@ var CategoryView = function ( container ) {
         return element;
     };
 
-    var updateHandler = function updateHandler(){
-        console.log('arguments', arguments);
+    var updateHandler = function updateHandler(e){
+        var id = e.target.value,
+            categoryElement = categoryCollection.find(id);
+        selectedCategoryChanged(categoryElement);
     }
 
     var setSelected = function setSelected(newSelectedCategory){
-        options[selectedCategory.id].selected = false;
+        if(selectedCategory){
+            options[selectedCategory.id].selected = false;
+        }
         selectedCategory = newSelectedCategory;
         options[selectedCategory.id].selected = true;
+    }
+
+    var selectedChanged = function selectedChanged(callback){
+        selectedCategoryChanged = callback;
     }
 
 
@@ -461,8 +596,33 @@ var CategoryView = function ( container ) {
 };
 
 module.exports = CategoryView;
-},{}],12:[function(require,module,exports){
-var ProductView = function ( container ) {
+},{}],13:[function(require,module,exports){
+var NotificationView = function ( container, observer ) {
+
+    var render = function (msg) {
+        var element = document.createElement("div"),
+            button = document.createElement('button');
+
+        element.setAttribute('class', 'errorMsg');
+        element.innerText = msg;
+        button.setAttribute('class', 'close');
+        button.innerText = 'X';
+        element.appendChild(button);
+        container.appendChild(element);
+        return element;
+    };
+
+    observer.register('/notice', function(msg){
+        render(msg);
+    });
+    
+};
+
+module.exports = NotificationView;
+},{}],14:[function(require,module,exports){
+var ProductView = function ( container, observer ) {
+
+    var productNodes = {};
 
     var render = function (productCollection) {
         // It'd be better to use a templating library for this
@@ -470,58 +630,39 @@ var ProductView = function ( container ) {
         while(container.firstChild){
             container.firstChild.remove();
         }
-        productCollection.forEach(function(product){
-            var element = document.createElement('li'),
-                name = document.createElement('span'),
-                price = document.createElement('span'),
-                action = document.createElement('input');
+        productNodes = {};
+        if(productCollection && productCollection.length > 0) {
+            productCollection.forEach(function(product){
+                var element = document.createElement('li'),
+                    name = document.createElement('span'),
+                    price = document.createElement('span'),
+                    action = document.createElement('input');
 
-            name.innerText = product.name;
-            price.innerText = product.price;
-            action.setAttribute('type', 'button');
-            action.setAttribute('value', 'Delete');
-            action.setAttribute('className', 'deleteBtn');
-            action.productId = product.id;
-            element.appendChild(name);
-            element.appendChild(price);
-            element.appendChild(action);
-            container.appendChild(element);
-        });
+                name.innerText = product.name;
+                price.innerText = product.price;
+                action.setAttribute('type', 'button');
+                action.setAttribute('value', 'Delete');
+                action.setAttribute('class', 'deleteBtn');
+                action.productId = product.id;
+                element.appendChild(name);
+                element.appendChild(price);
+                element.appendChild(action);
+                container.appendChild(element);
+                productNodes[action.productId] = {element: element}
+            });
+        }
         
     };
 
     var removeHandler = function removeHandler(e){
         if (e.target && e.target.matches("input.deleteBtn")) {
-            alert(e.target.productId);
+            //productNodes[e.target.productId].element.remove();
+            //delete productNodes[e.target.productId];
+            observer.publish('/delete-product', e.target.productId);
         }
     }
 
     container.addEventListener("click", removeHandler, false);
-
-
-    var deleteItem = function deleteItem() {
-        if(element.parentElement){
-            text.remove();
-            action.remove();
-            element.remove();
-            text = null;
-            action = null;
-            element = null;
-            action.removeEventListener('click', removeHandler, false);
-        }
-    };
-
-    var updateItem = function updateItem() {
-        if(element.parentElement){
-            text.innerText();
-            action.remove();
-            element.remove();
-            text = null;
-            action = null;
-            element = null;
-            action.removeEventListener('click', removeHandler, false);
-        }
-    };
 
     return {
         render: render
