@@ -1,7 +1,14 @@
 'use strict';
 
 var Defer = require('./DeferHelper');
-
+/**
+ * Cache library used as proxy of JSONService, will cache data from the done
+ * callback, but NOT the error callback
+ * @param {function} Service: internal low-level service instance
+                     passed as depencency for unit test mock
+ * @param {object} newOptions: cache configuration for type of storage and ttl
+ * @returns {Object} defer object with done and error methods
+ */
 var HttpCache = function(Service, newOptions) {
 
     newOptions = newOptions || {};

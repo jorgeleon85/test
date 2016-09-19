@@ -319,10 +319,9 @@ var JSONService = function(Request) {
 
         options = options || {};
         options.method = options.method || 'GET';
-        options.datatype = options.datatype || 'JSON';
 
         request = new Request();
-        request.open(options.method, endpoint + "?_=" + new Date().getTime(), true);
+        request.open(options.method, endpoint, true);
         request.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var data = null,
@@ -370,7 +369,7 @@ var JSONService = require('./JSONService'),
 
 var ProductService = function(){
 
-	var service = HttpCache(JSONService(XMLHttpRequest));
+	var service = new HttpCache(JSONService(XMLHttpRequest));
 
 	var getData = function getData(){
 		return service.request('services/products');

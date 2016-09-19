@@ -1,11 +1,17 @@
 'use strict';
 
+/**
+ * Collection factory for product information
+ * @constructor
+ */
+
 function ProductCollection() {
 
     var scope = {
         collection: []
     }
 
+    // public function to add a new category
     function add(id, name, description, price) {
         scope.collection.push({
             id: id,
@@ -15,6 +21,7 @@ function ProductCollection() {
         });
     }
 
+    // populate data collection with raw data provided from the category service
     var load = function load(data) {
         scope.collection = [];
         if (data && data.length > 0) {
@@ -24,8 +31,9 @@ function ProductCollection() {
         }
     }
 
+    // public function to get an array of products given an array of one or more ids
     var findAll = function findAll(ids) {
-        if (ids) {
+        if (ids && ids.length > 0) {
             return scope.collection.filter(function(item) {
                 return ids.indexOf(item.id) !== -1
             });
@@ -34,6 +42,8 @@ function ProductCollection() {
         }
     }
 
+    // get the next available id from the product list
+    // by getting the current max + 1
     var nextId = function nextId() {
         if (scope.collection.length === 0) {
             return 1;
@@ -44,13 +54,16 @@ function ProductCollection() {
         }
     }
 
+    // callback to pass the underlying collection
+    var items = function() {
+        return scope.collection;
+    }
+
     return {
         add: add,
         load: load,
         findAll: findAll,
-        items: function() {
-            return scope.collection
-        },
+        items: items,
         nextId: nextId
     };
 }
