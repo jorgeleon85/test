@@ -80,10 +80,15 @@ var HttpCache = function(Service, newOptions) {
         return true;
     }
 
+    var flush = function flush(){
+    	options.storage.clear();
+    }
+
     return {
         request: request,
         lookup: lookup,
-        save: save
+        save: save,
+        flush: flush
     }
 }
 

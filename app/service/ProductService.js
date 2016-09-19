@@ -5,14 +5,20 @@ var JSONService = require('./JSONService'),
 
 var ProductService = function(){
 
-	var service = HttpCache(JSONService(XMLHttpRequest));
+	var service = new HttpCache(JSONService(XMLHttpRequest));
 
 	var getData = function getData(){
 		return service.request('services/products');
 	}
 
+	var flush = function flush(){
+		service.flush();
+		return true;
+	}
+
 	return {
-		get: getData
+		get: getData,
+		flush: flush
 	}
 }
 

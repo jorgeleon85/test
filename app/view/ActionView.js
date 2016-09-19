@@ -6,7 +6,8 @@ var ActionView = function ( observer ) {
         productDescription = document.getElementById('productDescription'),
         productPrice = document.getElementById('productPrice'),
         addAction = document.getElementById('add'),
-        resetAction = document.getElementById('reset');
+        resetAction = document.getElementById('reset'),
+        flushAction = document.getElementById('flush');
 
     var addHandler = function addHandler(){
         observer.publish('/new-product', {name: productName.value, description: productDescription.value, price: productPrice.value});
@@ -16,8 +17,13 @@ var ActionView = function ( observer ) {
         observer.publish('/reset');
     }
 
+    var flushHandler = function flushHandler(){
+        observer.publish('/flush');
+    }
+
     addAction.addEventListener("click", addHandler, false);
     resetAction.addEventListener("click", resetHandler, false);
+    flushAction.addEventListener("click", flushHandler, false);
 
 };
 

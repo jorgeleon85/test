@@ -1,6 +1,6 @@
 'use strict';
 
-var JSONService = function(HttpRequest) {
+var JSONService = function(Request) {
 
     var request = function(endpoint, options) {
 
@@ -8,7 +8,8 @@ var JSONService = function(HttpRequest) {
             doneData = null,
             errorCallback = null,
             errorData = null,
-            defer = null;
+            defer = null,
+            request,
 
         defer = {
             done: function doneFunction(callback) {
@@ -29,9 +30,8 @@ var JSONService = function(HttpRequest) {
 
         options = options || {};
         options.method = options.method || 'GET';
-        options.datatype = options.datatype || 'JSON';
 
-        var request = new HttpRequest();
+        request = new Request();
         request.open(options.method, endpoint, true);
         request.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -48,11 +48,11 @@ var JSONService = function(HttpRequest) {
                     doneData = data;
                     doneCallback && doneCallback(data);
                 } else {
-                    errorData = "There was a problem parsing data from endpoint, please check data syntax and try again using reset button";
+                    errorData = "There was a problem parsing data from endpoint "+endpoint+", please check data syntax and try again using reset button";
                     errorCallback && errorCallback(errorData);
                 }
             } else if (this.readyState == 4 && this.status >= 300) {
-                errorData = "There was a problem getting data from the endpoint, please try again using reset button";
+                errorData = "There was a problem getting data from the endpoint "+endpoint+", please try again using reset button";
                 errorCallback && errorCallback(errorData);
             }
         };
@@ -60,8 +60,14 @@ var JSONService = function(HttpRequest) {
         return defer;
     }
 
+    var flush = function flush(){
+        // nothing to flush, added to implement cache interface
+        return false;
+    };
+
     return {
-        request: request
+        request: request,
+        flush: flush
     }
 };
 

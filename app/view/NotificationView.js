@@ -12,6 +12,11 @@ var NotificationView = function(container, observer) {
         button.innerText = 'X';
         element.appendChild(button);
         container.appendChild(element);
+
+        setTimeout(function(){
+            element.remove();
+        }, 5000);
+
         return element;
     };
 

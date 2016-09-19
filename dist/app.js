@@ -51,6 +51,11 @@ var indexController = (function() {
         productView.render(currentCategory.products);
     });
 
+    observer.register('/flush', function(newCurrentCategory){
+        categoryService.flush();
+        productService.flush();
+    });
+
     loadAndRender = function loadAndRender() {
 
         wait(
@@ -263,14 +268,20 @@ var JSONService = require('./JSONService'),
 
 var CategoryService = function(){
 
-	var service = HttpCache(JSONService(XMLHttpRequest));
+	var service = new HttpCache(JSONService(XMLHttpRequest));
 
 	var getData = function getData(){
 		return service.request('services/categories');
 	}
 
+	var flush = function flush(){
+		service.flush();
+		return true;
+	}
+
 	return {
-		get: getData
+		get: getData,
+		flush: flush
 	}
 }
 
@@ -278,7 +289,7 @@ module.exports = CategoryService;
 },{"../util/HttpCache":8,"./JSONService":5}],5:[function(require,module,exports){
 'use strict';
 
-var JSONService = function(HttpRequest) {
+var JSONService = function(Request) {
 
     var request = function(endpoint, options) {
 
@@ -286,7 +297,8 @@ var JSONService = function(HttpRequest) {
             doneData = null,
             errorCallback = null,
             errorData = null,
-            defer = null;
+            defer = null,
+            request,
 
         defer = {
             done: function doneFunction(callback) {
@@ -309,8 +321,8 @@ var JSONService = function(HttpRequest) {
         options.method = options.method || 'GET';
         options.datatype = options.datatype || 'JSON';
 
-        var request = new HttpRequest();
-        request.open(options.method, endpoint, true);
+        request = new Request();
+        request.open(options.method, endpoint + "?_=" + new Date().getTime(), true);
         request.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 var data = null,
@@ -326,11 +338,11 @@ var JSONService = function(HttpRequest) {
                     doneData = data;
                     doneCallback && doneCallback(data);
                 } else {
-                    errorData = "There was a problem parsing data from endpoint, please check data syntax and try again using reset button";
+                    errorData = "There was a problem parsing data from endpoint "+endpoint+", please check data syntax and try again using reset button";
                     errorCallback && errorCallback(errorData);
                 }
             } else if (this.readyState == 4 && this.status >= 300) {
-                errorData = "There was a problem getting data from the endpoint, please try again using reset button";
+                errorData = "There was a problem getting data from the endpoint "+endpoint+", please try again using reset button";
                 errorCallback && errorCallback(errorData);
             }
         };
@@ -338,8 +350,14 @@ var JSONService = function(HttpRequest) {
         return defer;
     }
 
+    var flush = function flush(){
+        // nothing to flush, added to implement cache interface
+        return false;
+    };
+
     return {
-        request: request
+        request: request,
+        flush: flush
     }
 };
 
@@ -358,8 +376,14 @@ var ProductService = function(){
 		return service.request('services/products');
 	}
 
+	var flush = function flush(){
+		service.flush();
+		return true;
+	}
+
 	return {
-		get: getData
+		get: getData,
+		flush: flush
 	}
 }
 
@@ -470,10 +494,15 @@ var HttpCache = function(Service, newOptions) {
         return true;
     }
 
+    var flush = function flush(){
+    	options.storage.clear();
+    }
+
     return {
         request: request,
         lookup: lookup,
-        save: save
+        save: save,
+        flush: flush
     }
 }
 
@@ -556,7 +585,8 @@ var ActionView = function ( observer ) {
         productDescription = document.getElementById('productDescription'),
         productPrice = document.getElementById('productPrice'),
         addAction = document.getElementById('add'),
-        resetAction = document.getElementById('reset');
+        resetAction = document.getElementById('reset'),
+        flushAction = document.getElementById('flush');
 
     var addHandler = function addHandler(){
         observer.publish('/new-product', {name: productName.value, description: productDescription.value, price: productPrice.value});
@@ -566,8 +596,13 @@ var ActionView = function ( observer ) {
         observer.publish('/reset');
     }
 
+    var flushHandler = function flushHandler(){
+        observer.publish('/flush');
+    }
+
     addAction.addEventListener("click", addHandler, false);
     resetAction.addEventListener("click", resetHandler, false);
+    flushAction.addEventListener("click", flushHandler, false);
 
 };
 
@@ -644,6 +679,11 @@ var NotificationView = function(container, observer) {
         button.innerText = 'X';
         element.appendChild(button);
         container.appendChild(element);
+
+        setTimeout(function(){
+            element.remove();
+        }, 5000);
+
         return element;
     };
 

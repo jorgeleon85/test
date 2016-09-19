@@ -50,6 +50,11 @@ var indexController = (function() {
         productView.render(currentCategory.products);
     });
 
+    observer.register('/flush', function(newCurrentCategory){
+        categoryService.flush();
+        productService.flush();
+    });
+
     loadAndRender = function loadAndRender() {
 
         wait(
