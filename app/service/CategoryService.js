@@ -2,7 +2,6 @@
 
 /**
  * Service constructor to load category informacion and proxy the Cache functionality
- * @constructor
  * @returns {Object} an object with methods get and flush
  */
 
@@ -16,7 +15,7 @@ var CategoryService = function(){
 	var service = new HttpCache(JSONService(XMLHttpRequest));
 
 	// public get method to encapsulate service request
-	var getData = function getData(){
+	var get = function get(){
 		return service.request('services/categories');
 	}
 
@@ -28,7 +27,7 @@ var CategoryService = function(){
 
 	// export public api
 	return {
-		get: getData,
+		get: get,
 		flush: flush
 	}
 }

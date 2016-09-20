@@ -26,7 +26,7 @@ var ProductService = function(){
 
 	// export public api
 	return {
-		get: getData,
+		get: get,
 		flush: flush
 	}
 }

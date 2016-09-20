@@ -88,7 +88,6 @@ var indexController = (function() {
             function(successData, errorMsg) {
 
                 // all services were completed though any could have failed
-
                 if (successData[0]) {
                     // successData[0] has data, service was successful, load products
                     productCollection.load(successData[0]);
@@ -128,8 +127,10 @@ var indexController = (function() {
             });
     };
 
+    // load and render by default the first time
     loadAndRender();
 
+    // return module and dependencies
     return {
         module: indexController,
         dependencies: [

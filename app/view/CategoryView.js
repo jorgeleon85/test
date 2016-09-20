@@ -1,52 +1,59 @@
 'use strict';
 
+/**
+ * View to control category data in a select
+ * @param {DOM Element} container: select DOM element to contain the options
+ * @param {object} observer: pub/sub instance to publish category changes
+ * @returns {Object} public methods to the view: register,
+ */
 var CategoryView = function(container, observer) {
 
-    var element = document.createElement("select"),
-        categoryCollection = null,
-        selectedCategory = null,
-        selectedCategoryChanged = function() {},
-        options = {};
+    var categoryCollection = null, // reference to category model
+        selectedCategory = null; // current category selected
 
-    element.setAttribute('id', 'productCategory')
-
-    var render = function(_categoryCollection) {
-        categoryCollection = _categoryCollection;
-        while (element.firstChild) {
-            element.firstChild.remove();
+    var render = function(collection) {
+        
+        // remove old items from category dropdown
+        categoryCollection = collection;
+        while (container.firstChild) {
+            container.firstChild.remove();
         }
-        options = {};
 
+        // iterate over category items and populate category dropdown
         categoryCollection.items().forEach(function(item) {
             var option = document.createElement('option');
             option.innerText = item.name;
             option.setAttribute('value', item.id);
-            if (selectedCategory && item.id == selectedCategory.id) {
-                option.selected = true;
-            }
-            options[item.id] = option;
-            element.appendChild(option);
+            container.appendChild(option);
         });
-        container.appendChild(element);
-        return element;
+
+        // pre-select the current category
+        if(selectedCategory) {
+            container.value = selectedCategory.id;
+        }
+
+        return container;
     };
 
+    // update the current category after changed in the dropdown
     var updateHandler = function updateHandler(e) {
         var id = e.target.value,
             categoryElement = categoryCollection.find(id);
         observer.publish('/category-changed', categoryElement);
     }
 
+    // update category if changed from outside
     var setSelected = function setSelected(newSelectedCategory) {
-        if (selectedCategory) {
-            options[selectedCategory.id].selected = false;
-        }
         selectedCategory = newSelectedCategory;
-        options[selectedCategory.id].selected = true;
+        if(selectedCategory){
+            container.value = selectedCategory.id;
+        }
     }
 
-    element.addEventListener("change", updateHandler, false);
+    // bind changes from category dropdown
+    container.addEventListener("change", updateHandler, false);
 
+    // export public api
     return {
         render: render,
         setSelected: setSelected

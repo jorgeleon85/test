@@ -2,7 +2,7 @@
 
 /**
  * Collection factory for category information
- * @constructor
+ * @returns {Object} an object with public methods: add, load, find, items, get
  */
 
 function CategoryCollection() {
@@ -95,7 +95,6 @@ function CategoryCollection() {
         load: load,
         find: find,
         items: items,
-        addProduct: addProduct,
         get: get
     };
 }

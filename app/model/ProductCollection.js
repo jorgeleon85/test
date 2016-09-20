@@ -2,7 +2,8 @@
 
 /**
  * Collection factory for product information
- * @constructor
+ * @returns {Object} an object with public methods: add, load,
+ *                   findAll, items, nextId
  */
 
 function ProductCollection() {
@@ -59,6 +60,7 @@ function ProductCollection() {
         return scope.collection;
     }
 
+    // export public api
     return {
         add: add,
         load: load,
