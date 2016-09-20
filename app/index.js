@@ -60,8 +60,12 @@ var indexController = (function() {
 
     observer.register('/new-product', function(data) {
         // add new product to current category and re-render product view
-        currentCategory.add(data.name, data.description, data.price);
-        productView.render(currentCategory.products);
+        if(currentCategory) {
+            currentCategory.add(data.name, data.description, data.price);
+            productView.render(currentCategory.products);
+        } else {
+            observer.publish('/notice', "Can not add a product if no category is selected");
+        }
     });
 
     observer.register('/delete-product', function(id) {
@@ -126,6 +130,8 @@ var indexController = (function() {
                     // re-render products only if there's category data
                     categoryView.setSelected(currentCategory);
                     productView.render(currentCategory.products);
+                } else {
+                    productView.render([]);
                 }
             });
     };
