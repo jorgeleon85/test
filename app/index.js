@@ -116,7 +116,7 @@ var indexController = (function() {
                 // render category view with given data
                 categoryView.render(categoryCollection);
 
-                if (currentCategory === null) {
+                if (!currentCategory) {
                     // first time loading data, choose the first category as selected by default
                     currentCategory = categoryCollection.get(0);
                 } else {
