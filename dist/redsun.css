@@ -1,0 +1,287 @@
+/* ========================================================================= */
+/* Global                                                                    */
+/* ========================================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    line-height: 1em;
+    background-color: #fff;
+}
+
+h1 {
+    font-size: 2em;
+    line-height: 1em;
+    color: #661400;
+}
+
+main {
+    margin: 5px;
+}
+
+/* ========================================================================= */
+/* Header                                                                    */
+/* ========================================================================= */
+
+header {
+    display: block;
+    background-color: #ffebe6;
+    padding: 20px 30px;
+}
+
+header p {
+    margin-left: 50px;
+}
+
+/* ========================================================================= */
+/* Categories                                                                */
+/* ========================================================================= */
+
+.categories {
+    float: left;
+    width: 25%;
+}
+
+.categories__label {
+    margin-bottom: 10px;
+    display: inline-block;
+    color: #661400;
+    font-weight: bold;
+}
+
+.styled-select {
+    display: inline-block;
+    position: relative;
+}
+
+.styled-select:before {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent; 
+    border-top: 5px solid #AAA;
+}
+
+select {
+    -webkit-appearance: button;
+    border: 0;
+    color: #555;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: transparent;
+    padding-right: 10px;
+    font-size: 14px;
+}
+
+option {
+    font-weight: normal;
+    display: block;
+    white-space: pre;
+    min-height: 1.2em;
+    padding: 0px 2px 1px;
+}
+
+
+input[type=text] {
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* ========================================================================= */
+/* Form                                                                      */
+/* ========================================================================= */
+
+.form, .form-fields {
+    overflow: hidden;
+}
+
+.entries {
+    width: 75%;
+    float: left;
+}
+
+.entry {
+    float: left;
+    width: 33.3%;
+    padding: 0 10px;
+}
+
+
+
+/* ========================================================================= */
+/* Actions                                                                   */
+/* ========================================================================= */
+
+.actions {
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.action {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 20px;
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+}
+
+.action:hover {
+    //background-color: #eee;
+    border-color: #e62e00;
+}
+
+.actionItem {
+    width: 33.3%;
+    float: left;
+    text-align: center;
+}
+
+/* ========================================================================= */
+/* Product                                                                   */
+/* ========================================================================= */
+
+.entries {
+    display: inline-block;
+}
+
+.products {
+    margin: 10px 0;
+    list-style: none;
+}
+
+.products__item {
+    position: relative;
+    display: inline-block;
+    list-style: none;
+    width: 25%;
+}
+
+.deleteBtn:before {
+    content: "\2718";
+    margin-right: 5px;
+}
+
+.deleteBtn {
+    border: 1px solid #a1a1a1;
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px;
+    background: #fff;
+    color: #333;
+    border-radius: 2px;
+    margin-left: 5px;
+    width: 64px;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin-top: -12px;
+}
+
+
+.deleteBtn:hover {
+    border-color: #e62e00;
+}
+
+.products__item {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.products__item__name, .products__item__price {
+    font-weight: bold;
+}
+
+.products__item__name::after {
+    content: "-";
+    padding: 0 2px;
+}
+
+.products__item__price::before {
+    content: "$";
+}
+
+.products__item__tooltiptext {
+    visibility: hidden;
+    width: 100%;
+    background-color: #f2f2f2;
+    color: #000;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    transition: opacity 1s;
+    opacity: 0;
+    left: 0;
+    top: 100%;
+    margin-top: 8px;
+}
+
+.products__texts {
+    display: inline-block;
+    margin-right: 65px;
+    color: #cc2900;
+}
+
+.products__item:hover .products__item__tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.total {
+    border: 1px solid #000;
+    text-align: center;
+    padding: 5px;
+}
+
+.errorMsg {
+    border: 1px solid #E82E05;
+    background-color: #ffebe6;
+    padding: 10px;
+    margin-top: 10px;
+} 
+
+@media only screen and (max-width: 850px) {
+    .products__item {
+        width: 50%;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .products__item {
+        width: 100%;
+    }
+
+    .entry {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .categories {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    .entries {
+        width: 100%;
+    }
+}

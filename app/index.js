@@ -42,6 +42,7 @@ var indexController = (function() {
         observer),
         productView = new ProductView(
         document.getElementById('productContainer'),
+        document.getElementById('totalContainer'),
         observer),
         actionView = new ActionView(observer),
         notificationView = new NotificationView(
@@ -92,6 +93,7 @@ var indexController = (function() {
                     // successData[0] has data, service was successful, load products
                     productCollection.load(successData[0]);
                 } else if (errorMsg[0]) {
+                    productCollection.load([]);
                     // successData[0] has no data, it means productService failed,
                     // error should be in errorMsg[0] so notify of error and not load data
                     observer.publish('/notice', errorMsg[0]);
@@ -103,6 +105,7 @@ var indexController = (function() {
                 } else if (errorMsg[1]) {
                     // successData[1] has no data, it means categoryService failed,
                     // error should be in errorMsg[1] so notify of error and not load data
+                    categoryCollection.load([], productCollection);
                     observer.publish('/notice', errorMsg[1]);
                 }
 

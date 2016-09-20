@@ -1,23 +1,71 @@
-<html>
+<!DOCTYPE html> 
+<html lang=en>
 	<head>
-		<title>Shopping List</title>
+		<meta charset=utf-8>
+		<meta content="IE=edge" http-equiv=X-UA-Compatible>
+		<meta content="width=device-width,initial-scale=1" name=viewport>
+		<title>Shopping List - GFS</title>
+		<link href=dist/redsun.css rel=stylesheet>
 	</head>
 	<body>
-		
-		<div>
-			<select id="categoryContainer">
-			</select>
-			<input id="productName" type="text" placeholder="name">
-			<input id="productDescription" type="text" placeholder="description">
-			<input id="productPrice" type="text" placeholder="price">
-			<input id="add" type="button" value="Add">
-			<input id="reset" type="button" value="Reset">
-			<input id="flush" type="button" value="Flush">
-		</div>
-		<ul id="productContainer">
-		</ul>
 
-		<div id="noticeContainer"></div>
+		<main>
+		
+			<header>
+				<h1>My Shopping List</h1>
+				<p>Load, add, switch and have fun!</p>
+			</header>
+
+			<main>
+
+			<div class="form">
+
+				<div class="form-fields">
+			
+					<div class="categories">
+						<span class="categories__label">Categories:</span>
+						<div class="styled-select">
+							<select id="categoryContainer" class="categories__select">
+							</select>
+						</div>
+					</div>
+
+					<div class="entries">
+						<div class="entry">
+							<input id="productName" type="text" placeholder="name" class="entries">
+						</div>
+						<div class="entry">
+							<input id="productDescription" type="text" placeholder="description">
+						</div>
+						<div class="entry">
+							<input id="productPrice" type="text" placeholder="price">
+						</div>
+					</div>
+
+				</div>
+
+				<div class="actions">
+					<div class="actionItem">
+						<input id="add" type="button" class="action" value="Add">
+					</div>
+					<div class="actionItem">
+						<input id="reset" type="button" class="action" value="Reset">
+					</div>
+					<div class="actionItem">
+						<input id="flush" type="button" class="action" value="Flush">
+					</div>
+				</div>
+
+			</div>
+
+			<ul id="productContainer" class="products">
+			</ul>
+
+			<div id="totalContainer" class="total"></div>
+
+			<div id="noticeContainer"></div>
+
+		</main>
 		
 		<script type="text/javascript" src="dist/app.js"></script>
 

@@ -89,7 +89,7 @@ function CategoryCollection() {
         return scope.collection;
     }
 
-    // public api
+    // export public api
     return {
         add: add,
         load: load,

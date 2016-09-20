@@ -10,21 +10,17 @@ var NotificationView = function(container, observer) {
 
     // render an event to the 
     var render = function(msg) {
-        var element = document.createElement("div"),
-            button = document.createElement('button');
+        var element = document.createElement("div");
 
         // append a message to the container
         element.setAttribute('class', 'errorMsg');
         element.innerText = msg;
-        button.setAttribute('class', 'close');
-        button.innerText = 'X';
-        element.appendChild(button);
         container.appendChild(element);
 
-        // remove notice after 5 seconds
+        // remove notice after 10 seconds
         setTimeout(function(){
             element.remove();
-        }, 5000);
+        }, 10000);
 
         return element;
     };
